@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   Fainance Lab design tokens — from the Fainance Brand Playbook.
+   These are the single source of truth. Do not hard-code hex values in
+   components; reference the token utilities (bg-brand-blue, text-ink, ...).
+   ========================================================================= */
+@theme {
+  /* --- Core brand ------------------------------------------------------- */
+  --color-brand-blue: #0a6fee; /* primary */
+  --color-brand-green: #04a544; /* accounting / growth */
+  --color-brand-gold: #fbb215; /* ACCENT ONLY — never a background field,
+                                  never carries white text */
+  --color-ink: #0c1a2b; /* dark surfaces + body text */
+
+  /* Hover states "deepen the brand colour" rather than tint or fade it. */
+  --color-brand-blue-deep: #0857be;
+  --color-brand-green-deep: #038336;
+  --color-brand-gold-deep: #e09c06;
+
+  /* --- Neutral scale (overrides Tailwind's default `neutral`) ----------- */
+  --color-neutral-50: #f5f8fc;
+  --color-neutral-100: #eaf0f7;
+  --color-neutral-200: #d8e1ec;
+  --color-neutral-300: #bcc8d6;
+  --color-neutral-400: #94a3b4;
+  --color-neutral-500: #5b6b7b;
+  --color-neutral-600: #43515f;
+  --color-neutral-700: #2c3844;
+  --color-neutral-800: #17222e;
+  --color-neutral-900: #0c1a2b;
+
+  /* --- Type ------------------------------------------------------------- */
+  --font-display: var(--font-poppins), "Segoe UI", system-ui, sans-serif;
+  --font-body: var(--font-mulish), "Segoe UI", system-ui, sans-serif;
+  --font-arabic: var(--font-cairo), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* --- Radii — never 0px on a container --------------------------------- */
+  --radius-chip: 8px;
+  --radius-card: 16px;
+  --radius-card-lg: 18px;
+  --radius-panel: 22px;
+  --radius-pill: 999px;
+
+  /* --- Motion ----------------------------------------------------------- */
+  /* Playbook easing: calm, never frantic. 0.3–0.6s. */
+  --ease-brand: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* --- Elevation -------------------------------------------------------- */
+  --shadow-card: 0 4px 16px -2px rgb(12 26 43 / 0.08), 0 2px 4px -1px rgb(12 26 43 / 0.04);
+  --shadow-lift: 0 12px 28px -6px rgb(12 26 43 / 0.14), 0 4px 8px -2px rgb(12 26 43 / 0.06);
+}
+
+/* Signature gradient — blue → green at 120deg. Gold NEVER appears here. */
+@utility bg-signature {
+  background-image: linear-gradient(120deg, #0a6fee 0%, #04a544 100%);
+}
+
+@utility text-signature {
+  background-image: linear-gradient(120deg, #0a6fee 0%, #04a544 100%);
+  background-clip: text;
+  color: transparent;
+}
+
+/* Shared interaction choreography for buttons and cards:
+   hover → colour deepens, element lifts, shadow grows
+   press → shadow settles, element nudges down ~1px */
+@utility interactive {
+  transition-property: color, background-color, border-color, transform,
+    box-shadow, opacity;
+  transition-duration: 300ms;
+  transition-timing-function: var(--ease-brand);
+}
+
+/* Hairline rule used under section eyebrows. */
+@utility rule-gold {
+  background-image: linear-gradient(
+    to right,
+    var(--color-brand-gold),
+    transparent
+  );
+}
+
+@layer base {
+  html {
+    /* Lenis drives scrolling; keep the native behaviour out of its way. */
+    scroll-behavior: auto;
+  }
+
+  body {
+    background-color: var(--color-neutral-50);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Arabic locale swaps the whole type stack to Cairo. Arabic glyphs are
+     never faux-bolded or stretched — Cairo ships real Regular/Bold weights,
+     so we always use a real weight. */
+  :lang(ar) body,
+  :lang(ar) h1,
+  :lang(ar) h2,
+  :lang(ar) h3,
+  :lang(ar) h4,
+  :lang(ar) .font-display {
+    font-family: var(--font-arabic);
+    font-synthesis-weight: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  /* Latin brand/product names keep their Latin face even inside Arabic copy. */
+  :lang(ar) .latin {
+    font-family: var(--font-display);
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-brand-blue) 22%, white);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* Lenis: required for the smooth-scroll instance to take over. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+/* Respect the user's motion preference — every reveal falls back to
+   "already visible" rather than animating. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
