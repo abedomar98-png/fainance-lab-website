@@ -18,6 +18,12 @@
   --color-brand-green-deep: #038336;
   --color-brand-gold-deep: #e09c06;
 
+  /* Semantic, not brand. The playbook has no error colour, and validation
+     messages need one that is unmistakably not gold. Defined here so it is a
+     deliberate token rather than an off-palette Tailwind default reached for
+     ad hoc in a component. */
+  --color-danger: #d92d20;
+
   /* --- Neutral scale (overrides Tailwind's default `neutral`) ----------- */
   --color-neutral-50: #f5f8fc;
   --color-neutral-100: #eaf0f7;

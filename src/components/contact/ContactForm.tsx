@@ -91,7 +91,7 @@ export function ContactForm() {
       />
 
       {status === "error" ? (
-        <p role="alert" className="text-sm font-semibold text-red-600">
+        <p role="alert" className="text-sm font-semibold text-danger">
           {copy.error}
         </p>
       ) : null}

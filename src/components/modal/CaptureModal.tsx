@@ -288,7 +288,7 @@ function CaptureModal({
             </div>
 
             {error ? (
-              <p role="alert" className="text-sm font-semibold text-red-600">
+              <p role="alert" className="text-sm font-semibold text-danger">
                 {error}
               </p>
             ) : null}
