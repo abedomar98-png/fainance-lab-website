@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Placeholder cover">
+  <!-- Neutral placeholder cover. Deliberately plain so it never reads as a
+       finished asset. Replace with the real cover artwork. -->
+  <rect width="800" height="600" fill="#EAF0F7"/>
+  <g fill="none" stroke="#BCC8D6" stroke-width="2" stroke-dasharray="10 10">
+    <rect x="24" y="24" width="752" height="552" rx="22"/>
+  </g>
+  <g transform="translate(400 268)">
+    <rect x="-58" y="-58" width="116" height="116" rx="28" fill="#D8E1EC"/>
+    <g stroke="#94A3B4" stroke-width="5" stroke-linecap="round" fill="none">
+      <path d="M-22 10 L-2 -14 L14 4 L30 -18"/>
+      <path d="M-30 30 H30"/>
+    </g>
+  </g>
+  <text x="400" y="392" text-anchor="middle" fill="#5B6B7B"
+        font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="22" letter-spacing="3">
+    PLACEHOLDER
+  </text>
+  <text x="400" y="426" text-anchor="middle" fill="#94A3B4"
+        font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="16">
+    cover artwork pending
+  </text>
+</svg>
