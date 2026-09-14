@@ -48,6 +48,13 @@ Arabic is the primary locale and the `x-default`; English is secondary. Every
 page lives under `src/app/[locale]/`, which is also the root layout (there is
 no `src/app/layout.tsx`). `src/proxy.ts` redirects un-prefixed paths.
 
+A first visit to `/` (or any un-prefixed path) **always opens Arabic** — the
+proxy deliberately ignores the browser's Accept-Language, since most browsers
+in the region send English. Don't reintroduce language negotiation. The only
+override is the `fainance-locale` cookie, written when the visitor clicks the
+language switcher. It is set on click, not in the proxy, because Next prefetches
+the switcher link and a request-based cookie would flip the language unasked.
+
 Server Components read copy with `getDictionary(locale)`. Client Components
 read it from `useLocale()`, which `LocaleProvider` supplies at the layout
 level along with `dir` and `flip` (+1 LTR / −1 RTL) — multiply any horizontal

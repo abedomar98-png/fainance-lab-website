@@ -10,6 +10,14 @@ export type Locale = (typeof locales)[number];
 
 export const defaultLocale: Locale = "ar";
 
+/**
+ * Remembers a visitor's explicit language choice. Set only by the language
+ * switcher, and read by the proxy when a visitor arrives without a locale in
+ * the URL — so a first visit always opens in Arabic, and someone who chose
+ * English isn't sent back to Arabic every time they return.
+ */
+export const LOCALE_COOKIE = "fainance-locale";
+
 export const localeDirection: Record<Locale, "rtl" | "ltr"> = {
   ar: "rtl",
   en: "ltr",
