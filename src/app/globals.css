@@ -24,6 +24,11 @@
      ad hoc in a component. */
   --color-danger: #d92d20;
 
+  /* The intro video's own background, sampled from its frames. Fills the
+     letterbox when the full-width intro window is taller than 16:9 (phones),
+     so the bars are indistinguishable from the video. */
+  --color-video-ground: #fdfbfa;
+
   /* --- Neutral scale (overrides Tailwind's default `neutral`) ----------- */
   --color-neutral-50: #f5f8fc;
   --color-neutral-100: #eaf0f7;

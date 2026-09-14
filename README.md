@@ -20,7 +20,7 @@ payments, no gated SaaS** — those are Phase 2. Nothing here blocks adding them
 | Framework | Next.js 16 (App Router, Turbopack) |
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 (CSS-first `@theme` tokens) |
-| Animation | `motion` (scroll reveals, gestures), GSAP (hero arrow draw-on), Lenis (smooth scroll) |
+| Animation | `motion` (scroll reveals, gestures), Lenis (smooth scroll) |
 | Deploy target | Vercel — **not yet deployed; no domain connected** |
 
 ## Commands
@@ -36,7 +36,7 @@ npm run make:placeholders # regenerate the stub download PDFs
 ```
 
 `npm run check:visual` needs the dev server running in another terminal. It
-loads both locales, waits out the signature arrow animation, scrolls to trigger
+loads both locales, follows the hero intro from full-width window to its docked panel, scrolls to trigger
 the staggered reveals, hovers cards, opens the capture modal, and writes
 screenshots to `.visual-check/`. A green `npm run build` says nothing about
 whether the page *looks* right — this is the check that does.
@@ -51,7 +51,7 @@ src/
 │   ├── cards/             # resource / course / post / testimonial cards
 │   ├── grids/             # the card grids those cards sit in
 │   ├── home/              # home page sections, in render order
-│   ├── hero/              # SignatureMark — the GSAP arrow draw-on
+│   ├── hero/              # HeroVideo — the brand intro video
 │   ├── layout/            # header, promo bar, footer, page masthead
 │   ├── modal/             # one capture modal, three content variants
 │   ├── providers/         # locale context, Lenis smooth scroll
@@ -103,7 +103,6 @@ finished than it is.
 | Trusted-by logos — section renders nothing until confirmed | `src/components/home/TrustedBy.tsx` |
 | WhatsApp number | `src/content/site.ts` |
 | Final legal copy | `src/i18n/dictionaries/*` (`legal`) |
-| Official logo as SVG (for a pixel-true hero animation) | `src/components/hero/SignatureMark.tsx` |
 
 ### A note on email
 

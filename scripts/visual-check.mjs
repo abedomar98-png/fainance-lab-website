@@ -3,7 +3,8 @@
  *
  * A passing `next build` says nothing about whether the page looks right or
  * whether the animations actually fire, so this drives a real browser: it
- * loads both locales, waits out the signature arrow draw, scrolls to trigger
+ * loads both locales, follows the hero intro from full-width window to its
+ * docked panel, scrolls to trigger
  * the staggered reveals, hovers cards, and opens the capture modal — capturing
  * a screenshot at each step.
  *
@@ -80,25 +81,83 @@ for (const locale of ["ar", "en"]) {
     logoTransform,
   );
 
-  /* --- signature arrow draw-on ---------------------------------------- */
-  await wait(300);
-  await page.screenshot({ path: `${outDir}/${locale}-01-hero-early.png` });
+  /* --- hero intro: full-width window -> docks into the panel ------------ */
+  const heroState = () =>
+    page.evaluate(() => {
+      const frame = document.querySelector("[data-hero-stage]");
+      const slot = frame.parentElement;
+      const section = frame.closest("section");
+      const video = frame.querySelector("[data-hero-video]");
+      const sound = frame.querySelector("[data-hero-sound]");
+      const h1 = section.querySelector("h1");
+      const f = frame.getBoundingClientRect();
+      const s = slot.getBoundingClientRect();
+      return {
+        stage: frame.dataset.heroStage,
+        frame: { top: f.top, left: f.left, width: f.width, height: f.height },
+        slot: { top: s.top, left: s.left, width: s.width, height: s.height },
+        sectionWidth: section.getBoundingClientRect().width,
+        copyOpacity: parseFloat(getComputedStyle(h1.parentElement).opacity),
+        muted: video.muted,
+        soundFallback: !!sound && sound.className.includes("border-brand-blue"),
+        ended: video.ended,
+      };
+    });
 
-  const midDraw = await page
-    .locator("[data-arrow]")
-    .evaluate((el) => getComputedStyle(el).strokeDashoffset);
-
-  await wait(2600);
-  await page.screenshot({ path: `${outDir}/${locale}-02-hero-settled.png` });
-
-  const endDraw = await page
-    .locator("[data-arrow]")
-    .evaluate((el) => getComputedStyle(el).strokeDashoffset);
-
+  await wait(1500);
+  await page.screenshot({ path: `${outDir}/${locale}-01-hero-intro.png` });
+  const intro = await heroState();
   note(
-    `[${locale}] gold arrow draws on`,
-    parseFloat(midDraw) > 1 && parseFloat(endDraw) < 1,
-    `dashoffset ${midDraw} -> ${endDraw}`,
+    `[${locale}] intro opens as a full-width window`,
+    intro.stage === "intro" && Math.abs(intro.frame.width - intro.sectionWidth) < 2,
+    `stage=${intro.stage} width=${Math.round(intro.frame.width)}/${Math.round(intro.sectionWidth)}`,
+  );
+  note(
+    `[${locale}] headline held back during intro`,
+    intro.copyOpacity < 0.05,
+    `opacity=${intro.copyOpacity}`,
+  );
+  // Sound is on by default; where the browser refuses unmuted autoplay the
+  // video plays muted with the sound control highlighted instead.
+  note(
+    `[${locale}] sound on by default (or blocked-autoplay fallback)`,
+    !intro.muted || intro.soundFallback,
+    intro.muted ? "browser blocked sound: fallback shown" : "playing with sound",
+  );
+
+  await wait(7000);
+  await page.screenshot({ path: `${outDir}/${locale}-02-hero-settled.png` });
+  const docked = await heroState();
+  const fits = ["top", "left", "width", "height"].every(
+    (k) => Math.abs(docked.frame[k] - docked.slot[k]) < 1.5,
+  );
+  note(
+    `[${locale}] video docks into its panel`,
+    docked.stage === "docked" && fits,
+    `stage=${docked.stage}`,
+  );
+  note(`[${locale}] headline revealed`, docked.copyOpacity === 1, `opacity=${docked.copyOpacity}`);
+  note(`[${locale}] intro plays once and holds`, docked.ended);
+
+  // Panel top sits level with the top of the headline's first line of glyphs.
+  const align = await page.evaluate(async () => {
+    await document.fonts.ready;
+    const h1 = document.querySelector("main section h1");
+    const cs = getComputedStyle(h1);
+    const ctx = document.createElement("canvas").getContext("2d");
+    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const m = ctx.measureText(h1.textContent);
+    const inkTop =
+      h1.getBoundingClientRect().top +
+      (parseFloat(cs.lineHeight) - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 +
+      (m.fontBoundingBoxAscent - m.actualBoundingBoxAscent);
+    const frameTop = document.querySelector("[data-hero-stage]").getBoundingClientRect().top;
+    return frameTop - inkTop;
+  });
+  note(
+    `[${locale}] video top aligns with headline`,
+    Math.abs(align) <= 1.5,
+    `off by ${align.toFixed(1)}px`,
   );
 
   /* --- staggered scroll reveals ---------------------------------------- */

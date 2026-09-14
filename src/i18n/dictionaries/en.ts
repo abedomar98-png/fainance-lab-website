@@ -96,6 +96,14 @@ const en = {
         "I spent 25 years closing books, running audits and building governance frameworks — long before anyone called it AI. Now I translate these tools into something a finance team can actually use on a Tuesday afternoon: in Arabic first, on real workflows, with the controls your auditors will ask about.",
       cta: "Explore Free Resources",
       secondaryCta: "About Me",
+      video: {
+        label: "Fainance Lab brand intro",
+        soundOn: "Turn sound on",
+        mute: "Mute",
+        play: "Play with sound",
+        replay: "Replay with sound",
+        skip: "Skip intro",
+      },
       stats: [
         { value: "[TBD]", label: "Years in finance & audit" },
         { value: "[TBD]", label: "Practice areas covered" },

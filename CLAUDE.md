@@ -18,7 +18,7 @@ npm run make:placeholders # regenerate stub download PDFs
 There is no unit test suite. `npm run check:visual` is the real verification
 step: it drives Chromium through both locales and asserts the things a build
 cannot — that `dir` flips to RTL, that the logo is *not* mirrored, that the
-GSAP arrow actually draws (stroke-dashoffset → 0), that scroll reveals settle
+hero intro opens full width and docks into its panel level with the headline, that scroll reveals settle
 at opacity 1, that cards lift on hover, and that the modal opens and closes on
 Escape. It writes screenshots to `.visual-check/`. Run it after any change to
 layout, motion or RTL behaviour.
@@ -67,16 +67,35 @@ Adding a blog post or a resource means editing one file in `src/content/` and
 nothing else.
 
 ### Motion
-Three libraries with non-overlapping jobs:
+Two libraries with non-overlapping jobs, plus the hero video:
 - **`motion`** — all scroll reveals and gestures. `RevealGroup` orchestrates a
   stagger; `Reveal` is one child. There are five entrance variants (`rise`,
   `settle`, `swing`, `grow`, `fade`) because applying one fade-in-up to
   everything is the clearest tell of a templated build — vary them by element
   kind.
-- **GSAP** — only `SignatureMark`, the hero's one scripted moment.
 - **Lenis** — site-wide smooth scroll. It owns the scroll position, so the
   header reads scroll via `useLenis`, and the modal must call `lenis.stop()`
   (`overflow:hidden` alone does not stop it).
+- **Hero intro video** (`HeroVideo.tsx`) — on load it plays as a window across
+  the hero's full width while the copy is held back, then at `DOCK_AT_SECONDS`
+  (the video's static logo hold) shrinks into its panel and calls `onReveal`,
+  which staggers the copy in. Things that are load-bearing:
+  - It is **one node, never remounted** — absolutely positioned out past its
+    panel slot during the intro, animated back, then every inline style is
+    cleared. The docked layout is plain CSS; remounting would restart the video.
+  - It **re-measures every frame while the intro shows**, because the promo bar
+    slides in after hydration and pushes the hero down; a stale measurement puts
+    the window's bottom edge and its controls below the fold.
+  - **Sound is attempted on**, but browsers refuse unmuted autoplay on a first
+    visit. It then plays muted and unmutes on the first pointer or key event —
+    the earliest moment a browser allows. Don't "fix" this by forcing muted.
+  - Playback starts from an effect, not `autoPlay`, so reduced-motion
+    visitors skip the intro and get the poster (the finished logo). Start and
+    safety timeouts dock it if the video never plays, so the copy is never
+    stuck hidden.
+  - The panel's top aligns with the headline's first line of glyphs via
+    `TITLE_INK_OFFSET` in `Hero.tsx` — measured per locale. Re-measure it if
+    the headline's size, leading or font changes; `check:visual` asserts it.
 
 Reveals render their hidden state into the SSR HTML, so a `<noscript>` block in
 the layout forces `[data-reveal]` visible without JS. Any new animated wrapper
@@ -99,9 +118,8 @@ in a component.
   a gradient.
 - No `0px` corners on containers.
 - **The logo is never mirrored, recoloured, or stretched.** In RTL it moves to
-  the right by layout; the artwork is untouched. `SignatureMark` is an
-  animation-only motif that echoes the logo — it is not the logo and must not
-  be used as one.
+  the right by layout; the artwork is untouched. Never mirror the hero
+  video either — it contains the logo.
 - The CTA slogan is the **last line** of a CTA surface, **once per surface**.
   Use `<Slogan />`; do not retype the string.
 - `/ar` uses Arabic-Indic numerals (٠–٩) everywhere. Hard-coded Arabic strings

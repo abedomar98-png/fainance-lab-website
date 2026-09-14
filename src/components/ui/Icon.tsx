@@ -117,6 +117,34 @@ export const GlobeIcon = (p: IconProps) => (
   </svg>
 );
 
+export const SoundOffIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z" />
+    <path d="m16 9.5 5 5M21 9.5l-5 5" />
+  </svg>
+);
+
+export const SoundOnIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z" />
+    <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+  </svg>
+);
+
+export const ReplayIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" />
+    <path d="M4.5 4v3.5H8" />
+  </svg>
+);
+
+export const SkipIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="m5 6.5 6 5.5-6 5.5" />
+    <path d="m12.5 6.5 6 5.5-6 5.5" />
+  </svg>
+);
+
 export const MailIcon = (p: IconProps) => (
   <svg {...base} {...p}>
     <rect x="3" y="5" width="18" height="14" rx="2.5" />

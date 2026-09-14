@@ -1,14 +1,15 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { useCallback, useState, type ReactNode } from "react";
 
-import { SignatureMark } from "@/components/hero/SignatureMark";
+import { HeroVideo } from "@/components/hero/HeroVideo";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { Button } from "@/components/ui/Button";
 import { ArrowIcon } from "@/components/ui/Icon";
 import { Container } from "@/components/ui/Section";
 import { Slogan } from "@/components/ui/Slogan";
-import { localeHref } from "@/lib/utils";
+import { cn, localeHref } from "@/lib/utils";
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;
 
@@ -16,15 +17,30 @@ const EASE = [0.25, 0.1, 0.25, 1] as const;
  * Hero.
  *
  * Deliberately asymmetric and left-aligned rather than a centred column over a
- * gradient blob. The signature mark sits opposite the copy and carries the
- * brand's one scripted motion moment (the gold arrow drawing on).
+ * gradient blob. The brand intro video sits opposite the copy.
  *
- * Entrance is time-based rather than scroll-based — this is above the fold, so
- * there is nothing to scroll into view.
+ * Load sequence: the video plays as a window spanning the hero's full width
+ * while the copy is held back; as the logo settles it shrinks into its panel
+ * and the copy reveals in a stagger. HeroVideo decides when, via `onReveal`.
+ * The resting layout is identical whether or not the intro ran.
+ *
+ * The video panel shares the headline's grid row, so its top edge lines up
+ * with the top of the headline's first line of letters.
  */
+
+/**
+ * Distance from the top of the headline box to the top of its first line of
+ * glyphs, measured in the browser at the lg breakpoint (text-5xl, 1.12 line
+ * height). Poppins sits below the box top; Cairo's alef and lam rise above
+ * it. Re-measure if the headline size, leading or font changes.
+ */
+const TITLE_INK_OFFSET = { en: "lg:mt-[3px]", ar: "lg:-mt-[3px]" } as const;
+
 export function Hero() {
   const { dict, locale } = useLocale();
   const { hero } = dict.home;
+  const [revealed, setRevealed] = useState(false);
+  const reveal = useCallback(() => setRevealed(true), []);
 
   // Split the headline so the key phrase can carry the signature gradient.
   // If a translation reworded the accent phrase out of the title, fall back to
@@ -52,24 +68,31 @@ export function Hero() {
       />
 
       <Container className="relative py-16 sm:py-20 lg:py-24">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          {/* Copy */}
-          <motion.div
-            initial="hidden"
-            animate="show"
-            variants={{
-              hidden: {},
-              show: { transition: { staggerChildren: 0.09 } },
-            }}
-            className="flex flex-col items-start gap-6"
-          >
-            <Item>
-              <span className="inline-flex items-center gap-2.5 rounded-pill border border-neutral-200 bg-white px-4 py-1.5 font-mono text-[0.7rem] tracking-[0.12em] text-neutral-600 uppercase shadow-card">
-                <span className="size-1.5 rounded-full bg-brand-gold" />
-                {hero.eyebrow}
-              </span>
-            </Item>
+        {/* Rows at lg: the eyebrow sits alone above; the headline and the video
+            panel share the next row so their tops align. */}
+        <motion.div
+          initial="hidden"
+          animate={revealed ? "show" : "hidden"}
+          variants={{
+            hidden: {},
+            show: { transition: { staggerChildren: 0.09, delayChildren: 0.15 } },
+          }}
+          className="grid items-start gap-y-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-x-16"
+        >
+          <Item className="lg:col-start-1 lg:row-start-1">
+            <span className="inline-flex items-center gap-2.5 rounded-pill border border-neutral-200 bg-white px-4 py-1.5 font-mono text-[0.7rem] tracking-[0.12em] text-neutral-600 uppercase shadow-card">
+              <span className="size-1.5 rounded-full bg-brand-gold" />
+              {hero.eyebrow}
+            </span>
+          </Item>
 
+          {/* Copy. Inert to the pointer while it is still hidden. */}
+          <div
+            className={cn(
+              "flex flex-col items-start gap-6 lg:col-start-1 lg:row-start-2",
+              !revealed && "pointer-events-none",
+            )}
+          >
             <Item>
               <h1 className="max-w-xl text-4xl leading-[1.12] font-extrabold text-balance sm:text-5xl">
                 {before}
@@ -126,31 +149,43 @@ export function Hero() {
             <Item>
               <Slogan />
             </Item>
-          </motion.div>
+          </div>
 
-          {/* Signature mark */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.1 }}
-            className="relative mx-auto w-full max-w-md lg:max-w-none"
+          {/* Video panel — the slot the intro window docks into. */}
+          <div
+            className={cn(
+              "relative mx-auto mt-6 aspect-video w-full max-w-md lg:col-start-2 lg:row-start-2 lg:mx-0 lg:max-w-none",
+              TITLE_INK_OFFSET[locale],
+            )}
           >
-            <div className="rounded-panel border border-neutral-100 bg-white/70 p-8 shadow-card backdrop-blur-sm sm:p-10">
-              <SignatureMark className="h-auto w-full" />
-            </div>
-          </motion.div>
-        </div>
+            <HeroVideo onReveal={reveal} />
+          </div>
+        </motion.div>
       </Container>
     </section>
   );
 }
 
-/** One staggered child of the hero's entrance. */
-function Item({ children }: { children: React.ReactNode }) {
+/**
+ * One staggered child of the hero's entrance.
+ *
+ * data-reveal: the SSR HTML carries the hidden state, so the layout's
+ * noscript rule needs this to show the copy without JavaScript.
+ */
+function Item({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const reducedMotion = useReducedMotion();
   return (
     <motion.div
+      data-reveal
+      className={className}
       variants={{
-        hidden: { opacity: 0, y: 22 },
+        hidden: { opacity: 0, y: reducedMotion ? 0 : 22 },
         show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
       }}
     >
