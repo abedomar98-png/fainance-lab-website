@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
+import { hasIntroPlayed, markIntroPlayed } from "./intro-session";
+
 const SRC = "/assets/video/fainance-intro.mp4";
 /** The video's own final frame — the static logo hold. */
 const POSTER = "/assets/video/fainance-intro-poster.jpg";
@@ -65,7 +67,14 @@ function letterboxFeather(width: number, height: number): string {
  * muted and turns sound on at the visitor's first click or key press anywhere
  * on the page — the earliest moment a browser permits it.
  */
-export function HeroVideo({ onReveal }: { onReveal: () => void }) {
+export function HeroVideo({
+  onReveal,
+  introPlayed = false,
+}: {
+  onReveal: () => void;
+  /** The intro already ran this session: start docked and visible. */
+  introPlayed?: boolean;
+}) {
   const { dict } = useLocale();
   const copy = dict.home.hero.video;
 
@@ -147,6 +156,7 @@ export function HeroVideo({ onReveal }: { onReveal: () => void }) {
   const dock = useCallback(() => {
     const from = stageRef.current;
     if (from !== "intro" && from !== "boot") return;
+    markIntroPlayed();
     reveal();
 
     const frame = frameRef.current;
@@ -240,8 +250,10 @@ export function HeroVideo({ onReveal }: { onReveal: () => void }) {
     };
 
     const frame = requestAnimationFrame(() => {
-      if (reducedMotion) {
-        // No intro: rest in the panel on the poster, which is the final logo.
+      if (reducedMotion || hasIntroPlayed()) {
+        // No intro — reduced motion, or it already played this session (e.g.
+        // the visitor switched language). Rest in the panel on the poster,
+        // which is the finished logo; the panel control plays it with sound.
         reveal();
         goTo("docked");
         return;
@@ -257,6 +269,10 @@ export function HeroVideo({ onReveal }: { onReveal: () => void }) {
     const safetyTimer = window.setTimeout(dock, SAFETY_TIMEOUT_MS);
 
     return () => {
+      // Leaving mid-intro (e.g. switching language) counts as having seen it.
+      if (stageRef.current === "intro" || stageRef.current === "docking") {
+        markIntroPlayed();
+      }
       cancelAnimationFrame(frame);
       cancelAnimationFrame(watcher);
       window.clearTimeout(startTimer);
@@ -348,7 +364,7 @@ export function HeroVideo({ onReveal }: { onReveal: () => void }) {
       className={cn(
         "absolute inset-0 overflow-hidden rounded-panel border border-neutral-100 bg-video-ground shadow-card",
         "transition-opacity duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
-        stage === "boot" ? "opacity-0" : "opacity-100",
+        stage === "boot" && !introPlayed ? "opacity-0" : "opacity-100",
         inIntro && "z-20",
       )}
     >

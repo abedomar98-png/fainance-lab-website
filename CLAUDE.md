@@ -96,6 +96,11 @@ Two libraries with non-overlapping jobs, plus the hero video:
   - **Sound is attempted on**, but browsers refuse unmuted autoplay on a first
     visit. It then plays muted and unmutes on the first pointer or key event —
     the earliest moment a browser allows. Don't "fix" this by forcing muted.
+  - It **plays once per browsing session** (`intro-session.ts`,
+    sessionStorage). The home page remounts on every language switch and every
+    return to Home, so without this the intro replays each time. Leaving
+    mid-intro counts as played. A reload in the same tab does not replay it —
+    test in a new tab or incognito window.
   - Playback starts from an effect, not `autoPlay`, so reduced-motion
     visitors skip the intro and get the poster (the finished logo). Start and
     safety timeouts dock it if the video never plays, so the copy is never

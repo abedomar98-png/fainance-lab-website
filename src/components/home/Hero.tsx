@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useState, type ReactNode } from "react";
 
 import { HeroVideo } from "@/components/hero/HeroVideo";
+import { useIntroPlayed } from "@/components/hero/intro-session";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { Button } from "@/components/ui/Button";
 import { ArrowIcon } from "@/components/ui/Icon";
@@ -22,6 +23,8 @@ const EASE = [0.25, 0.1, 0.25, 1] as const;
  * Load sequence: the video plays as a window spanning the hero's full width
  * while the copy is held back; as the logo settles it shrinks into its panel
  * and the copy reveals in a stagger. HeroVideo decides when, via `onReveal`.
+ * The intro plays once per browsing session (see intro-session.ts); on later
+ * visits to Home in the same session the finished layout renders directly.
  * The resting layout is identical whether or not the intro ran.
  *
  * The video panel shares the headline's grid row, so its top edge lines up
@@ -39,8 +42,12 @@ const TITLE_INK_OFFSET = { en: "lg:mt-[3px]", ar: "lg:-mt-[3px]" } as const;
 export function Hero() {
   const { dict, locale } = useLocale();
   const { hero } = dict.home;
-  const [revealed, setRevealed] = useState(false);
-  const reveal = useCallback(() => setRevealed(true), []);
+  // Once the intro has played this session, the copy is simply there — no
+  // waiting for the video and no entrance animation.
+  const introPlayed = useIntroPlayed();
+  const [revealedByVideo, setRevealedByVideo] = useState(false);
+  const revealed = introPlayed || revealedByVideo;
+  const reveal = useCallback(() => setRevealedByVideo(true), []);
 
   // Split the headline so the key phrase can carry the signature gradient.
   // If a translation reworded the accent phrase out of the title, fall back to
@@ -71,7 +78,7 @@ export function Hero() {
         {/* Rows at lg: the eyebrow sits alone above; the headline and the video
             panel share the next row so their tops align. */}
         <motion.div
-          initial="hidden"
+          initial={introPlayed ? false : "hidden"}
           animate={revealed ? "show" : "hidden"}
           variants={{
             hidden: {},
@@ -158,7 +165,7 @@ export function Hero() {
               TITLE_INK_OFFSET[locale],
             )}
           >
-            <HeroVideo onReveal={reveal} />
+            <HeroVideo onReveal={reveal} introPlayed={introPlayed} />
           </div>
         </motion.div>
       </Container>
