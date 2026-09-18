@@ -14,17 +14,17 @@ import { buildMetadata } from "@/lib/metadata";
 import { localeHref } from "@/lib/utils";
 
 /*
- * ⚠️  DRAFT COPY — NEEDS ABED'S REVIEW BEFORE PUBLISHING.
+ * Copy on this page comes from "AbedLatif Al Omar - CV 2026 - Detailed.docx".
+ * Every fact is stated in that CV: the certifications and their issuing bodies,
+ * the roles, the eight territories, the industries, and the CPA/CFA/CIA/CCGO
+ * instructing. Nothing is rounded up — the CV says "over 25 years", so the page
+ * says 25+, even though the earliest role it lists is 1996.
  *
- * Everything on this page was written fresh for Fainance Lab from the
- * biographical facts supplied in the brief. It is NOT copied from
- * abedlatif-alomar.com, and it deliberately carries no named client
- * testimonials from that site: those were given in a different brand context
- * (personal consulting) and need the individuals' explicit confirmation before
- * they could be reused here.
+ * Present in the CV but deliberately left out:
+ * - the client named on the Deloitte engagement (client confidentiality)
+ * - abedlatif-alomar.com, which is a separate personal brand
  *
- * Unverified specifics (exact years, headcounts, named employers) are absent
- * rather than estimated.
+ * Still worth Abed's read-through before launch — it is his biography.
  */
 
 export async function generateMetadata({

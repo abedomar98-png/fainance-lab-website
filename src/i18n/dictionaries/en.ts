@@ -19,7 +19,7 @@ const en = {
     about: {
       title: "About Abed-Latif Al-Omar — Fainance Lab",
       description:
-        "25+ years in finance, audit and governance across the GCC and Levant — now focused on applying AI responsibly to real finance workflows.",
+        "25+ years in finance, audit and governance across the GCC, the Levant and the US — now focused on applying AI responsibly to real finance workflows.",
     },
     courses: {
       title: "Courses — Fainance Lab",
@@ -105,9 +105,11 @@ const en = {
         skip: "Skip intro",
       },
       stats: [
-        { value: "[TBD]", label: "Years in finance & audit" },
-        { value: "[TBD]", label: "Practice areas covered" },
-        { value: "[TBD]", label: "Countries of exposure" },
+        // From the CV: "over 25 years" (its own wording), the eight territories
+        // it lists, and the site's five content pillars.
+        { value: "25+", label: "Years in finance & audit" },
+        { value: "5", label: "Practice areas covered" },
+        { value: "8", label: "Countries of exposure" },
       ],
     },
     trustedBy: {
@@ -178,19 +180,22 @@ const en = {
     title: "I've done the work I'm teaching you to automate.",
     credentials: "MBA · CPA · CCGO",
     intro:
-      "I'm Abed-Latif Al-Omar. For more than 25 years I've worked as a finance, audit and governance executive across the GCC and the Levant — through Big 4 engagements and into CFO-level seats, where the month-end close, the audit file and the risk register were my responsibility, not a case study.",
+      "I'm Abed-Latif Al-Omar. For more than 25 years I've worked as a finance, audit and governance executive across Kuwait, Saudi Arabia, Jordan, Lebanon, the UAE, Oman, Bahrain and the United States — today as a CFO in Kuwait and as a GRC consultant with Deloitte in Saudi Arabia. The month-end close, the audit file and the risk register have been my responsibility, not a case study.",
     body: [
-      "Along the way I've trained professionals and built corporate programmes for organisations that needed their finance teams to be sharper, not just busier. That's where I learned the difference between a tool that demos well and a tool that survives contact with a real trial balance.",
-      "Over the last few years my focus has moved to applying AI responsibly inside finance, audit and GRC workflows. Responsibly is the operative word: these tools are extraordinary at drafting, reading and reconciling, and genuinely dangerous when nobody owns the review step. Knowing which is which takes domain judgement, not prompt tricks.",
+      "I started in public accounting in Texas, qualified as a CPA there in 2001, and audited a NYSE-listed oil and gas company at KPMG. Since then I have built an internal audit department from scratch, served as Chief Audit Executive, led finance turnarounds as a general manager, and sat as CFO — in real estate, contracting, F&B, retail, mining and the public sector.",
+      "I also teach: I have instructed candidates preparing for the CPA, CFA, CIA and CCGO certifications. And I use these tools on my own desk — AI-driven financial modelling for scenario analysis, sensitivity testing, driver-based forecasting and capex planning sits inside my current CFO role, not in a slide deck.",
+      "Responsibly is the operative word. These tools are extraordinary at drafting, reading and reconciling, and genuinely dangerous when nobody owns the review step. Knowing which is which takes domain judgement, not prompt tricks.",
       "Fainance Lab exists to close that gap — deep domain credibility on one side, practical AI fluency on the other, delivered in Arabic first. Everything here starts from a task you already own and ends with something you can hand to your auditor.",
     ],
     highlightsTitle: "In brief",
     highlights: [
-      "25+ years across finance, external audit, internal audit and governance",
-      "Big 4 background, CFO-level experience",
-      "Corporate training and programme delivery across multiple organisations",
-      "GCC and Levant market exposure",
-      "Focused on responsible, workflow-level AI adoption",
+      "25+ years across accounting, finance, external audit, internal audit and governance",
+      "CPA (Texas Board of Public Accountancy), MBA, CCGO",
+      "Big 4: assurance at KPMG Houston; GRC consulting with Deloitte",
+      "CFO, Chief Audit Executive and turnaround general manager roles",
+      "Instructor for CPA, CFA, CIA and CCGO candidates",
+      "Worked across Kuwait, Saudi Arabia, Jordan, Lebanon, the UAE, Oman, Bahrain and the US",
+      "Uses AI-driven financial modelling for forecasting, scenarios and capex planning",
     ],
     cta: "See the free resources",
   },
