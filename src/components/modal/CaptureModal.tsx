@@ -39,6 +39,13 @@ type ModalRequest = {
   resourceSlug?: string;
   resourceTitle?: string;
   fileUrl?: string;
+  /**
+   * Several files unlocked by one registration (e.g. an event's deck and
+   * self-assessment). Takes precedence over `fileUrl`.
+   */
+  files?: { label: string; url: string }[];
+  /** Called once the registration succeeds, so the opener can remember it. */
+  onUnlocked?: () => void;
   /** Populated for `notify` so we know which course they asked about. */
   courseSlug?: string;
 };
@@ -193,6 +200,7 @@ function CaptureModal({
       });
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
       setStatus("done");
+      request.onUnlocked?.();
     } catch {
       // The capture endpoint is a placeholder until an ESP is wired in, so a
       // failure here must not strand the visitor — surface it and let them retry.
@@ -240,7 +248,14 @@ function CaptureModal({
           <SuccessState
             titleId={titleId}
             descriptionId={descriptionId}
-            fileUrl={request.intent === "lead" ? request.fileUrl : undefined}
+            files={
+              request.intent !== "lead"
+                ? []
+                : (request.files ??
+                  (request.fileUrl
+                    ? [{ label: dict.modal.success.downloadNow, url: request.fileUrl }]
+                    : []))
+            }
             onClose={onClose}
           />
         ) : (
@@ -309,12 +324,12 @@ function CaptureModal({
 function SuccessState({
   titleId,
   descriptionId,
-  fileUrl,
+  files,
   onClose,
 }: {
   titleId: string;
   descriptionId: string;
-  fileUrl?: string;
+  files: { label: string; url: string }[];
   onClose: () => void;
 }) {
   const { dict } = useLocale();
@@ -338,12 +353,26 @@ function SuccessState({
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        {fileUrl ? (
-          <Button href={fileUrl} download size="lg">
-            <DownloadIcon className="size-5" />
-            {dict.modal.success.downloadNow}
-          </Button>
+        {files.length > 1 ? (
+          <p className="font-mono text-[0.7rem] tracking-wide text-neutral-500 uppercase">
+            {dict.modal.success.filesTitle}
+          </p>
         ) : null}
+        {files.map((file, index) => (
+          <Button
+            key={file.url}
+            href={file.url}
+            download
+            // A file, not a route — and some are large (the event deck).
+            prefetch={false}
+            size={files.length > 1 ? "md" : "lg"}
+            variant={index === 0 ? "primary" : "outline"}
+            className="text-center whitespace-normal"
+          >
+            <DownloadIcon className="size-5 shrink-0" />
+            {file.label}
+          </Button>
+        ))}
         <Button variant="ghost" onClick={onClose}>
           {dict.modal.success.done}
         </Button>

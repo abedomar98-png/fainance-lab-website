@@ -13,15 +13,18 @@ npm run typecheck         # next typegen && tsc --noEmit
 npm run lint              # eslint (next lint was removed in Next 16)
 npm run check:visual      # browser check — needs `npm run dev` running
 npm run make:placeholders # regenerate stub download PDFs
+npm run sync:assets       # copy hand-supplied assets from source-assets/ (auto before dev/build)
 ```
 
 There is no unit test suite. `npm run check:visual` is the real verification
 step: it drives Chromium through both locales and asserts the things a build
 cannot — that `dir` flips to RTL, that the logo is *not* mirrored, that the
-hero intro opens full width and docks into its panel level with the headline, that scroll reveals settle
-at opacity 1, that cards lift on hover, and that the modal opens and closes on
-Escape. It writes screenshots to `.visual-check/`. Run it after any change to
-layout, motion or RTL behaviour.
+gold arrow draws on, that the home sections render in order, that scroll
+reveals settle at opacity 1, that cards lift on hover, that the modal opens
+and closes on Escape, that the nav fits one row at 1024/1280/1440px, and that
+the FAQ accordion, glossary search and event download gate work. It writes
+screenshots to `.visual-check/`. Run it after any change to layout, motion or
+RTL behaviour.
 
 To check a single concern, edit the `note(...)` calls in
 `scripts/visual-check.mjs` — it is a plain script, not a test framework.
@@ -40,6 +43,10 @@ To check a single concern, edit the `note(...)` calls in
   `@utility`. Note that v4 emits the standalone `translate` CSS property for
   `-translate-y-*`, so anything inspecting computed styles must read
   `translate`, not `transform`.
+- Tailwind utilities sit in a later cascade layer than `@layer base`, and
+  layer order beats specificity. An override of a utility (e.g. Arabic → Cairo
+  for `font-display` / `font-mono`) must be written **outside** any `@layer`
+  in `globals.css`, or it silently never applies.
 
 ## Architecture
 
@@ -74,48 +81,63 @@ Adding a blog post or a resource means editing one file in `src/content/` and
 nothing else.
 
 ### Motion
-Two libraries with non-overlapping jobs, plus the hero video:
+Three libraries with non-overlapping jobs:
 - **`motion`** — all scroll reveals and gestures. `RevealGroup` orchestrates a
   stagger; `Reveal` is one child. There are five entrance variants (`rise`,
   `settle`, `swing`, `grow`, `fade`) because applying one fade-in-up to
   everything is the clearest tell of a templated build — vary them by element
-  kind.
+  kind. A reveal fires when `amount` (default 25%) of the element is in view,
+  so **never wrap something far taller than the viewport** (the glossary
+  table) in one — it would never fire and stay invisible.
 - **Lenis** — site-wide smooth scroll. It owns the scroll position, so the
-  header reads scroll via `useLenis`, and the modal must call `lenis.stop()`
-  (`overflow:hidden` alone does not stop it).
-- **Hero intro video** (`HeroVideo.tsx`) — on load it plays as a window across
-  the hero's full width while the copy is held back, then at `DOCK_AT_SECONDS`
-  (the video's static logo hold) shrinks into its panel and calls `onReveal`,
-  which staggers the copy in. Things that are load-bearing:
-  - It is **one node, never remounted** — absolutely positioned out past its
-    panel slot during the intro, animated back, then every inline style is
-    cleared. The docked layout is plain CSS; remounting would restart the video.
-  - It **re-measures every frame while the intro shows**, because the promo bar
-    slides in after hydration and pushes the hero down; a stale measurement puts
-    the window's bottom edge and its controls below the fold.
-  - **Sound is attempted on**, but browsers refuse unmuted autoplay on a first
-    visit. It then plays muted and unmutes on the first pointer or key event —
-    the earliest moment a browser allows. Don't "fix" this by forcing muted.
-  - It **plays once per browsing session** (`intro-session.ts`,
-    sessionStorage). The home page remounts on every language switch and every
-    return to Home, so without this the intro replays each time. Leaving
-    mid-intro counts as played. A reload in the same tab does not replay it —
-    test in a new tab or incognito window.
-  - Playback starts from an effect, not `autoPlay`, so reduced-motion
-    visitors skip the intro and get the poster (the finished logo). Start and
-    safety timeouts dock it if the video never plays, so the copy is never
-    stuck hidden.
-  - The panel's top aligns with the headline's first line of glyphs via
-    `TITLE_INK_OFFSET` in `Hero.tsx` — measured per locale. Re-measure it if
-    the headline's size, leading or font changes; `check:visual` asserts it.
+  header reads scroll via `useLenis`, and every overlay must call
+  `lenis.stop()` (`overflow:hidden` alone does not stop it). The video modal
+  and slide lightbox get this, plus Escape / focus trap / focus restore, from
+  `components/modal/use-dialog.ts`.
+- **GSAP** — only `hero/SignatureMark.tsx`, the brand's one scripted moment:
+  the gold growth arrow drawing on in the hero panel. `check:visual` asserts
+  its `[data-arrow]` stroke-dashoffset goes from >1 to 0.
+
+The old hero intro video is gone. The About Fainance section (directly under
+the hero) plays its own video with native controls — no autoplay.
 
 Reveals render their hidden state into the SSR HTML, so a `<noscript>` block in
 the layout forces `[data-reveal]` visible without JS. Any new animated wrapper
 must carry `data-reveal` or it will be invisible to non-JS visitors.
 
+### Hand-supplied assets
+The About Fainance video and the per-locale logo anatomy images are dropped
+into `source-assets/` (gitignored) and copied into `public/` by
+`scripts/sync-source-assets.mjs`, which runs as `predev` / `prebuild`. The home
+page checks which exist with `findPublicAsset()` (`lib/public-assets.ts`,
+server-only) and renders a placeholder for anything missing. See the README
+table for accepted names.
+
+### Videos caption box
+`VideoModal.tsx` embeds YouTube via the IFrame Player API and shows an Arabic
+box under the player: the video's original `summaryAr`, or — when the entry
+has a `captionsAr` .vtt — the cue for the current playhead. Captions are
+driven by **player state, not a timer**: a rAF loop runs only while PLAYING;
+any other state stops it and sets the cue once from `getCurrentTime()`, so
+paused text freezes on the paused frame's cue. A 4×/s check while paused
+follows seeks (YouTube doesn't always report them as a state change). Cues
+swap with no transition, so nothing is mid-animation when paused. This was
+verified in a browser by pausing mid-cue and sampling the box for 5 seconds;
+re-verify the same way after touching the modal.
+
+### Events
+`src/content/events.ts` is an extensible list; upcoming/past comes from the
+dates. Each event has a detail page at `/events/[slug]`. Its downloads sit
+behind the `lead` capture modal: `open({ intent: "lead", files, onUnlocked })`
+— one registration offers every file, and `EventDownloads` remembers the
+unlock per event in localStorage so a return visitor isn't asked again. The
+listing shows a search bar only from 4 events up.
+
 ### Modal
 One component, three variants (`lead` / `newsletter` / `notify`) plus a shared
-success state, opened via `useCaptureModal().open({ intent, ... })`. Adding a
+success state, opened via `useCaptureModal().open({ intent, ... })`. A `lead`
+request may pass `files` (several downloads for one registration) and
+`onUnlocked` (called on success). Adding a
 Phase 2 `register` variant means extending `ModalIntent` and the `copy` map —
 no structural change.
 
@@ -143,7 +165,12 @@ The brief is explicit that nothing may be invented, and the code reflects it.
 Do not "fill in" any of the following — they are unfinished on purpose and
 each is marked `TODO(abed)`:
 
-- Hero stats are `[TBD]`. Do not estimate years, headcounts or countries.
+- Hero stats come from the CV. Do not estimate years, headcounts or countries.
+- Every stat callout (Why Fainance, Who it's for) carries its publisher and
+  sample, checked against the primary source. Don't add a figure without one.
+- `src/content/videos.ts` is empty on purpose — no stand-in videos.
+- The personal brand abedlatif-alomar.com appears only inside the gated event
+  deck (its final QR slide), never on a Fainance page or public teaser.
 - Testimonials are placeholders with `isPlaceholder: true`, which renders a
   visible badge. Never write a plausible-sounding quote or name.
 - `TrustedBy` returns `null` and must stay that way until Abed confirms which

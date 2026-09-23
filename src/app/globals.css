@@ -24,11 +24,6 @@
      ad hoc in a component. */
   --color-danger: #d92d20;
 
-  /* The intro video's own background, sampled from its frames. Fills the
-     letterbox when the full-width intro window is taller than 16:9 (phones),
-     so the bars are indistinguishable from the video. */
-  --color-video-ground: #fdfbfa;
-
   /* --- Neutral scale (overrides Tailwind's default `neutral`) ----------- */
   --color-neutral-50: #f5f8fc;
   --color-neutral-100: #eaf0f7;
@@ -113,8 +108,7 @@
   :lang(ar) h1,
   :lang(ar) h2,
   :lang(ar) h3,
-  :lang(ar) h4,
-  :lang(ar) .font-display {
+  :lang(ar) h4 {
     font-family: var(--font-arabic);
     font-synthesis-weight: none;
   }
@@ -143,6 +137,23 @@
     outline-offset: 2px;
     border-radius: 4px;
   }
+}
+
+/* Arabic overrides for the font utilities. These must sit OUTSIDE any
+   @layer: Tailwind's `font-display` / `font-mono` utilities live in the
+   utilities layer, which beats @layer base whatever the specificity, so a
+   base-layer override never applied and Arabic in those elements fell back
+   to a system face. Mono keeps IBM Plex Mono for Latin and hands Arabic
+   glyphs (which it lacks) to Cairo. Keyed on the element's own language,
+   so a `lang="en"` span inside Arabic copy keeps its Latin face. */
+.font-display:lang(ar) {
+  font-family: var(--font-arabic);
+  font-synthesis-weight: none;
+}
+
+.font-mono:lang(ar) {
+  font-family: var(--font-plex-mono), var(--font-arabic);
+  font-synthesis-weight: none;
 }
 
 /* Lenis: required for the smooth-scroll instance to take over. */

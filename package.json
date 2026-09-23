@@ -3,16 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/sync-source-assets.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/sync-source-assets.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "check:visual": "node scripts/visual-check.mjs",
-    "make:placeholders": "node scripts/make-placeholder-files.mjs"
+    "make:placeholders": "node scripts/make-placeholder-files.mjs",
+    "sync:assets": "node scripts/sync-source-assets.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "gsap": "^3.15.0",
     "lenis": "^1.3.26",
     "motion": "^13.2.0",
     "next": "16.3.5",

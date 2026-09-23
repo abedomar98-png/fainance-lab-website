@@ -3,10 +3,10 @@
  *
  * A passing `next build` says nothing about whether the page looks right or
  * whether the animations actually fire, so this drives a real browser: it
- * loads both locales, follows the hero intro from full-width window to its
- * docked panel, scrolls to trigger
- * the staggered reveals, hovers cards, and opens the capture modal — capturing
- * a screenshot at each step.
+ * loads both locales, watches the gold arrow draw on, scrolls to trigger the
+ * staggered reveals, hovers cards, opens the capture modal, and exercises the
+ * newer pages (nav fit and "More" menu, FAQ accordion, glossary search, the
+ * event download gate) — capturing a screenshot at each step.
  *
  * Usage:
  *   npm run dev           # in one terminal
@@ -81,88 +81,73 @@ for (const locale of ["ar", "en"]) {
     logoTransform,
   );
 
-  /* --- hero intro: full-width window -> docks into the panel ------------ */
-  const heroState = () =>
-    page.evaluate(() => {
-      const frame = document.querySelector("[data-hero-stage]");
-      const slot = frame.parentElement;
-      const section = frame.closest("section");
-      const video = frame.querySelector("[data-hero-video]");
-      const sound = frame.querySelector("[data-hero-sound]");
-      const h1 = section.querySelector("h1");
-      const f = frame.getBoundingClientRect();
-      const s = slot.getBoundingClientRect();
-      return {
-        stage: frame.dataset.heroStage,
-        frame: { top: f.top, left: f.left, width: f.width, height: f.height },
-        slot: { top: s.top, left: s.left, width: s.width, height: s.height },
-        sectionWidth: section.getBoundingClientRect().width,
-        copyOpacity: parseFloat(getComputedStyle(h1.parentElement).opacity),
-        muted: video.muted,
-        soundFallback: !!sound && sound.className.includes("border-brand-blue"),
-        ended: video.ended,
-      };
-    });
+  /* --- signature arrow draw-on ---------------------------------------- */
+  await wait(300);
+  await page.screenshot({ path: `${outDir}/${locale}-01-hero-early.png` });
 
-  await wait(1500);
-  await page.screenshot({ path: `${outDir}/${locale}-01-hero-intro.png` });
-  const intro = await heroState();
-  note(
-    `[${locale}] intro opens as a full-width window`,
-    intro.stage === "intro" && Math.abs(intro.frame.width - intro.sectionWidth) < 2,
-    `stage=${intro.stage} width=${Math.round(intro.frame.width)}/${Math.round(intro.sectionWidth)}`,
-  );
-  note(
-    `[${locale}] headline held back during intro`,
-    intro.copyOpacity < 0.05,
-    `opacity=${intro.copyOpacity}`,
-  );
-  // Sound is on by default; where the browser refuses unmuted autoplay the
-  // video plays muted with the sound control highlighted instead.
-  note(
-    `[${locale}] sound on by default (or blocked-autoplay fallback)`,
-    !intro.muted || intro.soundFallback,
-    intro.muted ? "browser blocked sound: fallback shown" : "playing with sound",
-  );
+  const midDraw = await page
+    .locator("[data-arrow]")
+    .evaluate((el) => getComputedStyle(el).strokeDashoffset);
 
-  await wait(7000);
+  await wait(2600);
   await page.screenshot({ path: `${outDir}/${locale}-02-hero-settled.png` });
-  const docked = await heroState();
-  const fits = ["top", "left", "width", "height"].every(
-    (k) => Math.abs(docked.frame[k] - docked.slot[k]) < 1.5,
-  );
-  note(
-    `[${locale}] video docks into its panel`,
-    docked.stage === "docked" && fits,
-    `stage=${docked.stage}`,
-  );
-  note(`[${locale}] headline revealed`, docked.copyOpacity === 1, `opacity=${docked.copyOpacity}`);
-  note(`[${locale}] intro plays once and holds`, docked.ended);
 
-  // Panel top sits level with the top of the headline's first line of glyphs.
-  const align = await page.evaluate(async () => {
-    await document.fonts.ready;
-    const h1 = document.querySelector("main section h1");
-    const cs = getComputedStyle(h1);
-    const ctx = document.createElement("canvas").getContext("2d");
-    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-    const m = ctx.measureText(h1.textContent);
-    const inkTop =
-      h1.getBoundingClientRect().top +
-      (parseFloat(cs.lineHeight) - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 +
-      (m.fontBoundingBoxAscent - m.actualBoundingBoxAscent);
-    const frameTop = document.querySelector("[data-hero-stage]").getBoundingClientRect().top;
-    return frameTop - inkTop;
-  });
+  const endDraw = await page
+    .locator("[data-arrow]")
+    .evaluate((el) => getComputedStyle(el).strokeDashoffset);
+
   note(
-    `[${locale}] video top aligns with headline`,
-    Math.abs(align) <= 1.5,
-    `off by ${align.toFixed(1)}px`,
+    `[${locale}] gold arrow draws on`,
+    parseFloat(midDraw) > 1 && parseFloat(endDraw) < 1,
+    `dashoffset ${midDraw} -> ${endDraw}`,
+  );
+
+  /* --- home section order ------------------------------------------------
+     Hero, About Fainance, Why Fainance, What you'll learn, Who it's for,
+     Resources — and nothing after it (newsletter, testimonials and blog
+     preview are paused; Trusted-by renders nothing). */
+  const sectionCount = await page.locator("main > section").count();
+  note(`[${locale}] home renders 6 sections`, sectionCount === 6, `${sectionCount}`);
+  if (locale === "en") {
+    const titles = await page.locator("main > section h2").allTextContents();
+    const expected = [
+      "AI + Finance = Growth",
+      "Fluent in both languages: accounting and AI",
+      "Five practice areas, one practical lens",
+      "The full finance function",
+      "Start with something you can use today",
+    ];
+    note(
+      "[en] home sections in order",
+      expected.every((t, i) => titles[i]?.trim() === t),
+      titles.join(" | "),
+    );
+  }
+
+  /* --- About Fainance media ------------------------------------------- */
+  const about = await page.evaluate(() => {
+    const video = document.querySelector("main video");
+    const anatomy = [...document.images].find((i) =>
+      decodeURIComponent(i.currentSrc || i.src).includes("logo-anatomy"),
+    );
+    return {
+      video: video?.getAttribute("src") ?? null,
+      anatomy: anatomy ? decodeURIComponent(anatomy.currentSrc || anatomy.src) : null,
+      anatomyTransform: anatomy ? getComputedStyle(anatomy).transform : null,
+    };
+  });
+  note(`[${locale}] about video present`, !!about.video, about.video ?? "placeholder");
+  note(
+    `[${locale}] logo anatomy in this locale, not mirrored`,
+    !!about.anatomy &&
+      about.anatomy.includes(`logo-anatomy-${locale}`) &&
+      !String(about.anatomyTransform).startsWith("matrix(-"),
+    about.anatomy ?? "placeholder",
   );
 
   /* --- staggered scroll reveals ---------------------------------------- */
-  const pillars = page.locator("section:has(ul) li").first();
-  await page.evaluate(() => window.scrollTo({ top: 900, behavior: "smooth" }));
+  const pillars = page.locator("section:has(ul li svg) li").first();
+  await pillars.scrollIntoViewIfNeeded();
   await wait(400);
   await page.screenshot({ path: `${outDir}/${locale}-03-pillars-entering.png` });
   await wait(1400);
@@ -238,16 +223,174 @@ for (const locale of ["ar", "en"]) {
   });
 
   /* --- inner pages ------------------------------------------------------ */
-  for (const route of ["about", "courses", "resources", "blog", "contact"]) {
+  for (const route of [
+    "about",
+    "courses",
+    "resources",
+    "blog",
+    "contact",
+    "videos",
+    "events",
+    "events/forum-accountants-financiers-2026",
+    "faq",
+    "glossary",
+    "terms",
+  ]) {
     await page.goto(`${BASE}/${locale}/${route}`, { waitUntil: "networkidle" });
     await scrollThrough(page);
     await page.evaluate(() => window.scrollTo({ top: 0 }));
     await wait(600);
     await page.screenshot({
-      path: `${outDir}/${locale}-page-${route}.png`,
+      path: `${outDir}/${locale}-page-${route.replaceAll("/", "_")}.png`,
       fullPage: true,
     });
   }
+
+  /* --- nav: one row at every desktop width, "More" menu -------------- */
+  for (const width of [1024, 1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`${BASE}/${locale}/faq`, { waitUntil: "networkidle" });
+    const fit = await page.evaluate(() => {
+      const nav = document.querySelector("header nav");
+      const items = [...nav.children].map((el) => el.getBoundingClientRect());
+      const bar = nav.parentElement.getBoundingClientRect();
+      const tools = [...nav.parentElement.children].map((el) => el.getBoundingClientRect());
+      const cta = [...document.querySelectorAll("header a")].find(
+        (a) => !a.closest("nav") && a.getAttribute("href")?.endsWith("/resources"),
+      );
+      const ctaBox = cta?.getBoundingClientRect();
+      return {
+        oneRow: items.every((r) => Math.abs(r.top - items[0].top) < 2),
+        inside: tools.every((r) => r.left >= bar.left - 1 && r.right <= bar.right + 1),
+        noOverlap: tools.every((r, i) => i === 0 || tools[i - 1].right <= r.left + 1 || tools[i - 1].left >= r.right - 1),
+        overflow: document.documentElement.scrollWidth > window.innerWidth,
+        ctaVisible: !!ctaBox && ctaBox.width > 0,
+        barHeight: Math.round(bar.height),
+      };
+    });
+    note(
+      `[${locale}] nav fits one row at ${width}px`,
+      fit.oneRow && fit.inside && fit.noOverlap && !fit.overflow && fit.ctaVisible,
+      JSON.stringify(fit),
+    );
+    await page.screenshot({
+      path: `${outDir}/${locale}-nav-${width}.png`,
+      clip: { x: 0, y: 0, width, height: 90 },
+    });
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+
+  const more = page.locator("header nav button[aria-haspopup]");
+  await more.click();
+  await wait(400);
+  const menuLinks = await page.locator("header nav ul a").allTextContents();
+  await page.screenshot({
+    path: `${outDir}/${locale}-nav-more.png`,
+    clip: { x: 0, y: 0, width: 1440, height: 260 },
+  });
+  note(`[${locale}] More menu lists FAQ + Glossary`, menuLinks.length === 2, menuLinks.join(", "));
+  await page.keyboard.press("Escape");
+  await wait(400);
+  note(
+    `[${locale}] More menu closes on Escape`,
+    (await page.locator("header nav ul").count()) === 0,
+  );
+
+  /* --- FAQ accordion ---------------------------------------------------- */
+  const faqCount = await page.locator("[data-faq-item]").count();
+  note(`[${locale}] FAQ has 9 questions`, faqCount === 9, `${faqCount}`);
+  const firstQ = page.locator("[data-faq-item] button").first();
+  await firstQ.click();
+  await wait(500);
+  const opened = await firstQ.getAttribute("aria-expanded");
+  const answerVisible = await page.locator("[data-faq-item] [role=region]").first().isVisible();
+  await firstQ.click();
+  await wait(500);
+  const closed = await firstQ.getAttribute("aria-expanded");
+  note(
+    `[${locale}] FAQ answer opens and closes`,
+    opened === "true" && answerVisible && closed === "false",
+  );
+
+  /* --- glossary search -------------------------------------------------- */
+  await page.goto(`${BASE}/${locale}/glossary`, { waitUntil: "networkidle" });
+  const rows = page.locator("[data-glossary-row]");
+  const total = await rows.count();
+  const tableVisible = await page.evaluate(() => {
+    let el = document.querySelector("[data-glossary]");
+    let opacity = 1;
+    for (; el; el = el.parentElement) opacity *= parseFloat(getComputedStyle(el).opacity);
+    return opacity;
+  });
+  note(`[${locale}] glossary table visible`, tableVisible === 1, `opacity=${tableVisible}`);
+  const search = page.locator("input[type=search]");
+  const countFor = async (q) => {
+    await search.fill(q);
+    await wait(150);
+    return rows.count();
+  };
+  const lower = await countFor("audit");
+  const upper = await countFor("AUDIT");
+  const partial = await countFor("prom");
+  const arabic = await countFor("تدقيق");
+  const none = await countFor("zzqx");
+  await page.screenshot({ path: `${outDir}/${locale}-glossary-no-results.png` });
+  const noResults = await page.locator("p.border-dashed").isVisible();
+  await search.fill("");
+  note(
+    `[${locale}] glossary search (partial, case-insensitive, both languages)`,
+    total > 30 && lower > 0 && lower < total && upper === lower && partial > 0 && arabic > 0 && none === 0,
+    `total=${total} audit=${lower} AUDIT=${upper} prom=${partial} تدقيق=${arabic} zzqx=${none}`,
+  );
+  note(`[${locale}] glossary no-results state`, noResults);
+
+  /* --- event download gate: one registration unlocks both -------------- */
+  await page.goto(`${BASE}/${locale}/events`, { waitUntil: "networkidle" });
+  note(
+    `[${locale}] events: no search bar under 4 events`,
+    (await page.locator("[role=search]").count()) === 0,
+  );
+  await page.goto(`${BASE}/${locale}/events/forum-accountants-financiers-2026`, {
+    waitUntil: "networkidle",
+  });
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: "networkidle" });
+  const slideCount = await page.locator("main button img[src*='slide-']").count();
+  note(`[${locale}] event shows exactly 3 teaser slides`, slideCount === 3, `${slideCount}`);
+  const gate = page.locator("[data-event-downloads]");
+  await gate.scrollIntoViewIfNeeded();
+  await wait(800);
+  const lockedState = await gate.getAttribute("data-event-downloads");
+  await page.locator("[data-event-register]").click();
+  await wait(600);
+  const dialog2 = page.getByRole("dialog");
+  await dialog2.locator("input").nth(0).fill("Visual Check");
+  await dialog2.locator("input").nth(1).fill("check@example.com");
+  await dialog2.locator("button[type=submit]").click();
+  await wait(1200);
+  const offered = await dialog2.locator("a[download]").count();
+  await page.screenshot({ path: `${outDir}/${locale}-event-unlocked-modal.png` });
+  await page.keyboard.press("Escape");
+  await dialog2.waitFor({ state: "detached", timeout: 3000 }).catch(() => {});
+  const direct = await gate.locator("a[download]").count();
+  await page.screenshot({ path: `${outDir}/${locale}-event-unlocked-page.png` });
+  await page.reload({ waitUntil: "networkidle" });
+  await wait(500);
+  const persisted = await page.locator("[data-event-downloads]").getAttribute("data-event-downloads");
+  note(
+    `[${locale}] one registration unlocks both event files`,
+    lockedState === "locked" && offered === 2 && direct === 2 && persisted === "unlocked",
+    `before=${lockedState} modal=${offered} page=${direct} afterReload=${persisted}`,
+  );
+
+  /* --- terms: data-security paragraph ----------------------------------- */
+  await page.goto(`${BASE}/${locale}/terms`, { waitUntil: "networkidle" });
+  const termsParas = await page.locator("main section p").count();
+  note(
+    `[${locale}] terms carries the data-security paragraph`,
+    termsParas >= 3,
+    `${termsParas} paragraphs`,
+  );
 
   note(
     `[${locale}] no console errors`,
@@ -276,6 +419,14 @@ await mpage.screenshot({ path: `${outDir}/mobile-ar-home.png`, fullPage: true })
 await mpage.getByRole("button", { name: "فتح القائمة" }).click();
 await wait(700);
 await mpage.screenshot({ path: `${outDir}/mobile-ar-menu.png` });
+const drawerLinks = await mpage.locator("header nav a").allTextContents();
+note(
+  "[mobile] drawer lists Videos, Events, FAQ and Glossary",
+  ["الفيديوهات", "الفعاليات", "الأسئلة الشائعة", "المصطلحات"].every((t) =>
+    drawerLinks.some((l) => l.includes(t)),
+  ),
+  drawerLinks.join(", "),
+);
 await mobile.close();
 
 await browser.close();

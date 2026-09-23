@@ -16,8 +16,11 @@ export function LegalPage({
 }: {
   title: string;
   notice: string;
-  body: string;
+  /** One paragraph, or several. */
+  body: string | string[];
 }) {
+  const paragraphs = Array.isArray(body) ? body : [body];
+
   return (
     <Section className="bg-white">
       <Container className="max-w-3xl">
@@ -39,13 +42,16 @@ export function LegalPage({
             </p>
           </Reveal>
 
-          <Reveal
-            as="p"
-            variant="rise"
-            className="leading-relaxed text-neutral-600"
-          >
-            {body}
-          </Reveal>
+          {paragraphs.map((paragraph) => (
+            <Reveal
+              as="p"
+              key={paragraph}
+              variant="rise"
+              className="leading-relaxed text-neutral-600"
+            >
+              {paragraph}
+            </Reveal>
+          ))}
         </RevealGroup>
       </Container>
     </Section>

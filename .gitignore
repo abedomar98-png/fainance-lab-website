@@ -47,3 +47,9 @@ next-env.d.ts
 # source-of-truth files stay in OneDrive rather than being forked into git —
 # everything the site actually serves lives in /public/assets.
 /source-assets/
+
+# The raw About Fainance video (72 MB) is copied here from source-assets/ by
+# scripts/sync-source-assets.mjs but is too large to track. Until a compressed
+# version is committed, clones and deploys have no file here, so the section
+# shows its placeholder. Delete this entry when adding the compressed video.
+/public/assets/video/about-fainance.mp4

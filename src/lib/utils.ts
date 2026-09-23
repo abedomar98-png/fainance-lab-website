@@ -42,3 +42,46 @@ export function formatDate(iso: string, locale: Locale): string {
   ).format(date);
   return formatted;
 }
+
+/**
+ * Format a date range ("27–30 July 2026" / «٢٧–٣٠ يوليو ٢٠٢٦»), collapsing the
+ * shared month and year.
+ *
+ * Assembled by hand rather than with `Intl.DateTimeFormat#formatRange`: Node
+ * and browsers ship different ICU data, which space the dash differently, and
+ * the server/client mismatch breaks hydration. Only month names come from
+ * Intl. Dates are ISO days, so they are read in UTC — otherwise a visitor west
+ * of Greenwich sees every date a day early.
+ */
+export function formatDateRange(
+  startIso: string,
+  endIso: string | undefined,
+  locale: Locale,
+): string {
+  const monthName = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en-GB", {
+    month: "long",
+    timeZone: "UTC",
+  });
+  const parts = (iso: string) => {
+    const date = new Date(iso);
+    return {
+      day: date.getUTCDate(),
+      month: monthName.format(date),
+      year: date.getUTCFullYear(),
+    };
+  };
+
+  const start = parts(startIso);
+  const end = endIso ? parts(endIso) : start;
+  let text: string;
+  if (!endIso || endIso === startIso) {
+    text = `${start.day} ${start.month} ${start.year}`;
+  } else if (start.year !== end.year) {
+    text = `${start.day} ${start.month} ${start.year} – ${end.day} ${end.month} ${end.year}`;
+  } else if (start.month !== end.month) {
+    text = `${start.day} ${start.month} – ${end.day} ${end.month} ${end.year}`;
+  } else {
+    text = `${start.day}–${end.day} ${start.month} ${start.year}`;
+  }
+  return formatNumber(text, locale);
+}

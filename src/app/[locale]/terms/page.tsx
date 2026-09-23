@@ -31,7 +31,7 @@ export default async function TermsPage({
     <LegalPage
       title={dict.footer.terms}
       notice={dict.legal.draftNotice}
-      body={dict.legal.termsBody}
+      body={[dict.legal.termsBody, dict.legal.termsDataSecurity]}
     />
   );
 }

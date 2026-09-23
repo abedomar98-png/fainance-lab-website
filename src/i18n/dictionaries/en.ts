@@ -48,6 +48,22 @@ const en = {
       title: "Terms of Use — Fainance Lab",
       description: "Terms governing the use of the Fainance Lab website.",
     },
+    faq: {
+      title: "FAQ — Fainance Lab",
+      description: "Answers to common questions about Fainance Lab: who it's for, what it costs, and how to use AI safely at work."
+    },
+    glossary: {
+      title: "Glossary — Fainance Lab",
+      description: "AI, finance, audit, GRC and Claude terms in English with their Arabic meaning — searchable in either language."
+    },
+    videos: {
+      title: "Videos — Fainance Lab",
+      description: "Curated videos on AI for accounting, finance, audit and GRC, each with an original Arabic summary."
+    },
+    events: {
+      title: "Events — Fainance Lab",
+      description: "Talks, forums and webinars where Fainance Lab has presented on AI for finance professionals."
+    },
   },
 
   nav: {
@@ -57,6 +73,11 @@ const en = {
     resources: "Resources",
     blog: "Blog",
     contact: "Contact",
+    videos: "Videos",
+    events: "Events",
+    faq: "FAQ",
+    glossary: "Glossary",
+    more: "More",
     primaryCta: "Free Resources",
     openMenu: "Open menu",
     closeMenu: "Close menu",
@@ -90,20 +111,12 @@ const en = {
     hero: {
       eyebrow: "AI for Accounting, Finance & GRC",
       /* Mission headline — the promise, not a slogan. */
-      title: "Make AI genuinely useful in the work you already do.",
-      titleAccent: "genuinely useful",
+      title: "AI-powered finance, made practical",
+      titleAccent: "made practical",
       story:
-        "I spent 25 years closing books, running audits and building governance frameworks — long before anyone called it AI. Now I translate these tools into something a finance team can actually use on a Tuesday afternoon: in Arabic first, on real workflows, with the controls your auditors will ask about.",
+        "You've heard AI will change accounting and finance forever — but no one told you how, in your language, for your actual job. Fainance closes that gap: practical AI skills for accounting, finance, audit, and GRC — free content, real templates, and guidance from someone who's actually run the numbers. Start with one pillar. See what changes this week.",
       cta: "Explore Free Resources",
       secondaryCta: "About Me",
-      video: {
-        label: "Fainance Lab brand intro",
-        soundOn: "Turn sound on",
-        mute: "Mute",
-        play: "Play with sound",
-        replay: "Replay with sound",
-        skip: "Skip intro",
-      },
       stats: [
         // From the CV: "over 25 years" (its own wording), the eight territories
         // it lists, and the site's five content pillars.
@@ -117,8 +130,129 @@ const en = {
       eyebrow: "Experience across",
       title: "Trusted by finance teams across the region",
     },
+    aboutFainance: {
+      eyebrow: "About Fainance",
+      title: "AI + Finance = Growth",
+      visionLabel: "Our vision",
+      vision: "Our vision is a finance and accounting profession where every professional — from first-year associates to board members — has the AI fluency to work faster, sharper, and with more confidence. We want to enable the mass community of finance and accounting professionals across the Arab world to achieve real acceleration and excellence in their daily work, not isolated pockets of adoption.",
+      missionLabel: "Our mission",
+      mission: "Fainance's name and mark say it plainly: AI + Finance = Growth. Our mission is to make that equation real — turning AI from an abstract trend into a concrete daily advantage for accounting, finance, audit, and governance professionals, starting in Arabic.",
+      videoLabel: "About Fainance",
+      videoPending: "Video coming soon",
+      logoAnatomyAlt: "The anatomy of the Fainance logo: AI + Finance = Growth",
+      logoAnatomyPending: "Logo anatomy graphic — coming soon"
+    },
+    why: {
+      eyebrow: "Why Fainance",
+      title: "Fluent in both languages: accounting and AI",
+      items: [
+        {
+          label: "Mission",
+          text: "Make AI genuinely useful for everyday finance work — in Arabic and English."
+        },
+        {
+          label: "Vision",
+          text: "A finance profession that grows — faster, smarter, upward."
+        },
+        {
+          label: "Promise",
+          text: "Clarity over hype. Every insight is practical."
+        },
+        {
+          label: "Positioning",
+          text: "For finance professionals and business owners who feel AI is either hype or a threat, Fainance is the trusted guide that makes it a practical, everyday advantage — because it speaks both languages fluently: accounting and AI."
+        }
+      ],
+      stats: [
+        {
+          figures: [
+            {
+              value: "88%",
+              label: "believe AI will be the most transformative trend in accounting and finance over the next 12–24 months"
+            },
+            {
+              value: "8%",
+              label: "feel their organisation is \"very well prepared\" for it"
+            }
+          ],
+          source: "AICPA & CIMA — survey of 1,446 finance leaders, Aug–Sep 2025"
+        },
+        {
+          figures: [
+            {
+              value: "52% → 29%",
+              label: "GCC organisations not using GenAI in tax, finance and legal functions, 2024 → 2025"
+            }
+          ],
+          source: "Deloitte — GenAI Adoption in the GCC 2026 (Saudi Arabia, UAE, Qatar, Kuwait)"
+        }
+      ]
+    },
+    audience: {
+      eyebrow: "Who it's for",
+      title: "The full finance function",
+      subtitle: "Each role wants the same thing said differently.",
+      items: [
+        {
+          id: "apar",
+          title: "AP / AR & Payroll Accountants",
+          role: "Process invoices, run payroll, reconcile ledgers daily.",
+          quote: "Show me exactly which task AI takes off my plate — and prove it won't break the numbers."
+        },
+        {
+          id: "cfo",
+          title: "CFOs & Finance Leaders",
+          role: "Own the numbers, the forecast, and the board's trust.",
+          quote: "Faster closes and cleaner forecasts — without adding headcount or risk."
+        },
+        {
+          id: "audit",
+          title: "Auditors & GRC Professionals",
+          role: "Test controls, assess risk, sign off with evidence.",
+          quote: "If AI touches the audit trail, I need to see how it's governed and logged."
+        },
+        {
+          id: "fpa",
+          title: "FP&A Officers",
+          role: "Model scenarios, track variance, brief leadership.",
+          quote: "Give me hours back on data prep so I can spend them on analysis."
+        },
+        {
+          id: "controller",
+          title: "Controllers",
+          role: "Guard accuracy, close the books, keep policy tight.",
+          quote: "Automation is welcome — as long as it is auditable and consistent."
+        },
+        {
+          id: "board",
+          title: "Board Members",
+          role: "Read the signals, ask the hard questions, steer strategy.",
+          quote: "I want clarity and confidence, not a demo of the latest hype."
+        },
+        {
+          id: "entrepreneur",
+          title: "Entrepreneurs",
+          role: "Wear every hat; finance is one of many.",
+          quote: "I'm wearing every hat — show me the one practical AI shortcut that actually saves me time this week."
+        }
+      ],
+      stat: {
+        figures: [
+          {
+            value: "61%",
+            label: "of finance managers name AI skills as the #1 skillset they're developing for their next career step"
+          },
+          {
+            value: "30%",
+            label: "rate AI for finance as a skill new professionals should bring on day one"
+          }
+        ],
+        framing: "New graduates bring fresher AI fluency; working professionals bring domain judgment. Combining both is the real advantage.",
+        source: "CFA Institute — survey of 500 UK finance managers, July 2026"
+      }
+    },
     pillars: {
-      eyebrow: "What we cover",
+      eyebrow: "What you'll learn",
       title: "Five practice areas, one practical lens",
       subtitle:
         "Every resource, course and post on this site sits in one of these five pillars — and starts from a task you already have on your desk.",
@@ -126,27 +260,27 @@ const en = {
         accounting: {
           title: "Accounting",
           description:
-            "Close faster, reconcile cleanly, and turn spreadsheets into something you can defend.",
+            "Write, explain and debug Excel formulas with Claude and Copilot, and know which tool fits which job. Run everyday tasks like three-way matching and invoice matching with prompts built on the five-step Manhaj framework — and check the output before it touches the ledger.",
         },
         finance: {
           title: "Finance",
           description:
-            "Forecasting, analysis and reporting that answers the question management actually asked.",
+            "Turn a budget-vs-actual table into management commentary you can defend, and build models with scenario and sensitivity analysis in a fraction of the time. Learn the daily AI tasks that fit FP&A, controllers and CFOs specifically — not generic tips.",
         },
         externalAudit: {
           title: "External Audit",
           description:
-            "Sampling, testing and documentation workflows that stand up to review.",
+            "Use AI to read long documents and pull out the evidence you need, and meet the AI tools already built for audit work. Learn where AI speeds up testing and documentation — and where judgment has to stay with you.",
         },
         internalAudit: {
           title: "Internal Audit",
           description:
-            "Risk-based planning, fieldwork and reporting — with AI doing the heavy reading.",
+            "Review unusual journal entries before the close: what to look for, how to ask Claude to surface them, and how to document what you found. Plan risk-based work with AI doing the heavy reading, while the conclusions stay yours.",
         },
         grc: {
           title: "GRC",
           description:
-            "Governance, risk and compliance frameworks built to be used, not filed.",
+            "Classify company data into four sensitivity levels before any of it reaches an AI tool, and learn the five questions to ask IT first. Compare how Copilot, Gemini, Claude and ChatGPT handle company data, so your AI use is governed, not improvised.",
         },
       },
     },
@@ -261,6 +395,69 @@ const en = {
     },
   },
 
+  filter: {
+    search: "Search…",
+    all: "All",
+    noResults: "Nothing matches your search.",
+    clear: "Clear search",
+    results: "results"
+  },
+
+  faq: {
+    eyebrow: "FAQ",
+    title: "Questions, answered.",
+    subtitle: "Everything people usually ask before they start."
+  },
+
+  glossary: {
+    eyebrow: "Glossary",
+    title: "The terms, in both languages.",
+    subtitle: "AI, finance, audit, GRC and Claude vocabulary — with its Arabic meaning. Search in either language.",
+    searchPlaceholder: "Search a term in English or Arabic…",
+    colTerm: "Term",
+    colMeaning: "Arabic meaning",
+    groups: {
+      ai: "AI & general",
+      finance: "Finance, audit & GRC",
+      claude: "Claude",
+      credential: "Credentials"
+    }
+  },
+
+  videos: {
+    eyebrow: "Videos",
+    title: "Watch, with an Arabic guide alongside.",
+    subtitle: "Hand-picked videos on AI for finance work. Every one comes with an original Arabic summary — and synced Arabic captions where available.",
+    searchPlaceholder: "Search videos…",
+    empty: "The first videos are being selected. Check back soon.",
+    watch: "Watch",
+    by: "By",
+    summaryLabel: "Arabic summary",
+    captionsLabel: "Arabic captions",
+    close: "Close video"
+  },
+
+  events: {
+    eyebrow: "Events",
+    title: "Talks, forums and webinars.",
+    subtitle: "Where Fainance has taken the conversation about AI in finance — in person and online.",
+    searchPlaceholder: "Search events…",
+    empty: "No events yet.",
+    past: "Past event",
+    upcoming: "Upcoming",
+    view: "View event",
+    back: "Back to all events",
+    organizer: "Organiser",
+    session: "The session",
+    outlineTitle: "What the talk covers",
+    slidesTitle: "From the slides",
+    downloadsTitle: "Take it with you",
+    downloadsIntro: "Register once to unlock both files — the full presentation as delivered, and the session self-assessment.",
+    register: "Register to download",
+    download: "Download",
+    enlarge: "Enlarge slide"
+  },
+
   modal: {
     close: "Close",
     lead: {
@@ -289,6 +486,7 @@ const en = {
       title: "Check your inbox",
       description:
         "Confirm your email address and your download will be waiting. If it isn't there in a minute, check your spam folder.",
+      filesTitle: "Your downloads",
       downloadNow: "Download now",
       done: "Done",
     },
@@ -316,6 +514,7 @@ const en = {
       "[PLACEHOLDER] This page is a stub. Final legal copy is pending review.",
     privacyBody:
       "Fainance Lab collects your name and email address only when you choose to download a resource or subscribe to the newsletter. We use them to send you the file you asked for and the newsletter you opted into, and nothing else. You can unsubscribe at any time.",
+    termsDataSecurity: "Before applying any Fainance materials to your company's data, check your own company's data security and AI usage policy first. Fainance is not responsible for any breach resulting from how you apply its materials.",
     termsBody:
       "The resources on this site are provided for general professional education. They do not constitute accounting, audit, tax, legal or investment advice, and they do not create a client relationship. Apply professional judgement and your own firm's review standards before relying on any output.",
   },
